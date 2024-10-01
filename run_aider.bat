@@ -1,0 +1,1 @@
+python -m aider --model azure/gpt-4o
