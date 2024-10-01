@@ -121,7 +121,7 @@ def main():
                         bricks = [pygame.Rect(x, y, BRICK_WIDTH, BRICK_HEIGHT) for x, y in levels[current_level]]
                         show_message(SCREEN, f"Level {current_level + 1}")
 
-        # Gift movement
+        # Gift movement and collision
         for gift in gifts[:]:
             gift_rect = pygame.Rect(gift[1][0], gift[1][1], 20, 20)
             gift_rect.move_ip(0, 5)
@@ -137,7 +137,30 @@ def main():
                 gifts.remove(gift)
             elif gift_rect.top > SCREEN_HEIGHT:
                 gifts.remove(gift)
-        SCREEN.fill(BLACK)
+        # Draw gifts
+        for gift in gifts:
+            gift_rect = pygame.Rect(gift[1][0], gift[1][1], 20, 20)
+            if gift[0] == 'extra_life':
+                pygame.draw.ellipse(SCREEN, GREEN, gift_rect)
+            elif gift[0] == 'fireball':
+                pygame.draw.ellipse(SCREEN, RED, gift_rect)
+            elif gift[0] == 'larger_paddle':
+                pygame.draw.rect(SCREEN, BLUE, gift_rect)
+            elif gift[0] == 'smaller_paddle':
+                pygame.draw.rect(SCREEN, WHITE, gift_rect)
+            gift[1] = (gift[1][0], gift[1][1] + 5)  # Move gift downwards
+            if gift_rect.colliderect(paddle):
+                if gift[0] == 'extra_life':
+                    lives += 1
+                elif gift[0] == 'fireball':
+                    ball_speed[1] *= 2
+                elif gift[0] == 'larger_paddle':
+                    paddle.width += 20
+                elif gift[0] == 'smaller_paddle':
+                    paddle.width -= 20
+                gifts.remove(gift)
+            elif gift_rect.top > SCREEN_HEIGHT:
+                gifts.remove(gift)
         pygame.draw.rect(SCREEN, PADDLE_COLOR, paddle)
         pygame.draw.ellipse(SCREEN, BALL_COLOR, ball)
         for brick in bricks:
