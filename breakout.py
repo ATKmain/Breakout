@@ -111,7 +111,7 @@ def main():
                 score += 10
                 if random.random() < 0.1:  # 10% chance to drop a gift
                     gift_type = random.choice(GIFT_TYPES)
-                    gifts.append((gift_type, brick.topleft))
+                    gifts.append([gift_type, list(brick.topleft)])
                 if not bricks:
                     current_level += 1
                     if current_level >= len(levels):
