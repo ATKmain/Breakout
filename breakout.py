@@ -112,7 +112,7 @@ def main():
             if ball.colliderect(brick):
                 ball_speed[1] = -ball_speed[1]
                 bricks.remove(brick)
-                score += 10
+                score += 1
                 if random.random() < 0.1:  # 10% chance to drop a gift
                     gift_type = random.choice(GIFT_TYPES)
                     gifts.append([gift_type, list(brick.topleft)])
