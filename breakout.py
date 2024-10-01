@@ -137,6 +137,9 @@ def main():
                 gifts.remove(gift)
             elif gift_rect.top > SCREEN_HEIGHT:
                 gifts.remove(gift)
+        # Clear the screen
+        SCREEN.fill(BLACK)
+
         # Draw gifts
         for gift in gifts:
             gift_rect = pygame.Rect(gift[1][0], gift[1][1], 20, 20)
