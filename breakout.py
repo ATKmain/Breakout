@@ -30,19 +30,42 @@ BALL_COLOR = WHITE
 ball = pygame.Rect(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, BALL_RADIUS, BALL_RADIUS)
 ball_speed = [random.choice([-4, 4]), -4]
 
-# Bricks
+# Bricks and Levels
 BRICK_WIDTH = 60
 BRICK_HEIGHT = 20
 BRICK_COLOR = RED
-bricks = [pygame.Rect(10 + i * (BRICK_WIDTH + 10), 10 + j * (BRICK_HEIGHT + 10), BRICK_WIDTH, BRICK_HEIGHT) for i in range(10) for j in range(5)]
+levels = [
+    [(10 + i * (BRICK_WIDTH + 10), 10 + j * (BRICK_HEIGHT + 10)) for i in range(10) for j in range(5)],
+    [(10 + i * (BRICK_WIDTH + 10), 10 + j * (BRICK_HEIGHT + 10)) for i in range(8) for j in range(6)],
+    [(10 + i * (BRICK_WIDTH + 10), 10 + j * (BRICK_HEIGHT + 10)) for i in range(12) for j in range(4)]
+]
+current_level = 0
+bricks = [pygame.Rect(x, y, BRICK_WIDTH, BRICK_HEIGHT) for x, y in levels[current_level]]
 
-# Game variables
+# Gifts
+GIFT_TYPES = ['extra_life', 'fireball', 'larger_paddle', 'smaller_paddle']
+gifts = []
 lives = 3
 score = 0
 
-# Main game loop
+def show_message(screen, message):
+    font = pygame.font.Font(None, 74)
+    text = font.render(message, True, WHITE)
+    text_rect = text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+    screen.blit(text, text_rect)
+    pygame.display.flip()
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                waiting = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                waiting = False
 def main():
-    global lives, score, ball_speed
+    global lives, score, ball_speed, current_level, bricks, gifts
 
     clock = pygame.time.Clock()
     running = True
@@ -75,7 +98,10 @@ def main():
             ball.topleft = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
             ball_speed = [random.choice([-4, 4]), -4]
             if lives == 0:
+                show_message(SCREEN, "Game Over")
                 running = False
+            else:
+                show_message(SCREEN, "Press Space to Continue")
 
         # Brick collision
         for brick in bricks[:]:
@@ -83,9 +109,31 @@ def main():
                 ball_speed[1] = -ball_speed[1]
                 bricks.remove(brick)
                 score += 10
-                break
+                if not bricks:
+                    current_level += 1
+                    if current_level >= len(levels):
+                        show_message(SCREEN, "You are the Champion!")
+                        running = False
+                    else:
+                        bricks = [pygame.Rect(x, y, BRICK_WIDTH, BRICK_HEIGHT) for x, y in levels[current_level]]
+                        show_message(SCREEN, f"Level {current_level + 1}")
 
-        # Drawing
+        # Gift movement
+        for gift in gifts[:]:
+            gift_rect = pygame.Rect(gift[1][0], gift[1][1], 20, 20)
+            gift_rect.move_ip(0, 5)
+            if gift_rect.colliderect(paddle):
+                if gift[0] == 'extra_life':
+                    lives += 1
+                elif gift[0] == 'fireball':
+                    ball_speed[1] *= 2
+                elif gift[0] == 'larger_paddle':
+                    paddle.width += 20
+                elif gift[0] == 'smaller_paddle':
+                    paddle.width -= 20
+                gifts.remove(gift)
+            elif gift_rect.top > SCREEN_HEIGHT:
+                gifts.remove(gift)
         SCREEN.fill(BLACK)
         pygame.draw.rect(SCREEN, PADDLE_COLOR, paddle)
         pygame.draw.ellipse(SCREEN, BALL_COLOR, ball)
@@ -98,6 +146,17 @@ def main():
         lives_text = font.render(f"Lives: {lives}", True, WHITE)
         SCREEN.blit(score_text, (10, SCREEN_HEIGHT - 40))
         SCREEN.blit(lives_text, (SCREEN_WIDTH - 100, SCREEN_HEIGHT - 40))
+
+        for gift in gifts:
+            gift_rect = pygame.Rect(gift[1][0], gift[1][1], 20, 20)
+            if gift[0] == 'extra_life':
+                pygame.draw.ellipse(SCREEN, GREEN, gift_rect)
+            elif gift[0] == 'fireball':
+                pygame.draw.ellipse(SCREEN, RED, gift_rect)
+            elif gift[0] == 'larger_paddle':
+                pygame.draw.rect(SCREEN, BLUE, gift_rect)
+            elif gift[0] == 'smaller_paddle':
+                pygame.draw.rect(SCREEN, WHITE, gift_rect)
 
         pygame.display.flip()
         clock.tick(60)
