@@ -7,7 +7,7 @@ pygame.init()
 
 # Screen dimensions
 SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_HEIGHT = 650  # Increased height to provide space for score and level display
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Breakout Game")
 
@@ -22,7 +22,7 @@ BLUE = (0, 0, 255)
 PADDLE_WIDTH = 100
 PADDLE_HEIGHT = 10
 PADDLE_COLOR = WHITE
-paddle = pygame.Rect(SCREEN_WIDTH // 2 - PADDLE_WIDTH // 2, SCREEN_HEIGHT - 30, PADDLE_WIDTH, PADDLE_HEIGHT)
+paddle = pygame.Rect(SCREEN_WIDTH // 2 - PADDLE_WIDTH // 2, SCREEN_HEIGHT - 50, PADDLE_WIDTH, PADDLE_HEIGHT)
 
 # Ball
 BALL_RADIUS = 10
@@ -92,6 +92,8 @@ def main():
         if ball.top <= 0:
             ball_speed[1] = -ball_speed[1]
         if ball.colliderect(paddle):
+            hit_pos = (ball.centerx - paddle.left) / PADDLE_WIDTH
+            ball_speed[0] = 8 * (hit_pos - 0.5)
             ball_speed[1] = -ball_speed[1]
         if ball.bottom >= SCREEN_HEIGHT:
             lives -= 1
@@ -173,8 +175,8 @@ def main():
         font = pygame.font.Font(None, 36)
         score_text = font.render(f"Score: {score}", True, WHITE)
         lives_text = font.render(f"Lives: {lives}", True, WHITE)
-        SCREEN.blit(score_text, (10, SCREEN_HEIGHT - 40))
-        SCREEN.blit(lives_text, (SCREEN_WIDTH - 100, SCREEN_HEIGHT - 40))
+        SCREEN.blit(score_text, (10, 10))
+        SCREEN.blit(lives_text, (SCREEN_WIDTH - 100, 10))
 
         for gift in gifts:
             gift_rect = pygame.Rect(gift[1][0], gift[1][1], 20, 20)
